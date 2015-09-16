@@ -1,0 +1,129 @@
+\section{Comparing GPU versus CPU Rendering}
+\label{sec:comparison}
+
+%\begin{figure}[tb]
+%  \center{
+%     \includegraphics[width=2.5in]{images/gpu_performance_preferences.png}
+%  }
+%  \caption{Illustrator CC 2014 panel for GPU Performance.}
+%  \label{fig:gpu-performance-preferences}
+%\end{figure}
+
+\begin{table*}
+%\small
+\centering
+    \begin{tabular}{| E{1.4in} | L{2.3in} | L{2.6in} |} 
+\hline
+{\bf Capability} & {\bf CPU} & {\bf GPU} \\
+\hline \hline
+
+Per-component storage & 8-bit fixed-point components & 8-bit fixed-point components (same) \\
+\hline
+
+Color opacity representation & Non-premultiplied ({\em straight}) alpha & Premultiplied \S\ref{sec:premultiplied} \\
+\hline
+
+Per-pixel storage & One color value per pixel & Multisampling: 8 distinct (hardware compressed) colors per pixel + 8 stencil samples \S\ref{sec:memory} \\
+\hline
+
+CMYK representation & CMYK color components stored ``as is'' & Components stored complemented \S\ref{sec:cmykblend} \\
+\hline
+
+CMYK organization & N channels + alpha channel allocated as linear image in system memory & Multiple RGBA buffers, rendered as multiple render targets \S\ref{sec:multiplebuffers} \\
+\hline
+
+CMYK excess framebuffer \newline storage & None & Color components allocated in multiples of 3, with alpha duplicated for every 3 color components \S\ref{sec:multiplebuffers},\ref{sec:memory} \\
+\hline
+
+    \end{tabular}
+
+\caption{Comparison of framebuffer storage and representation in CPU and GPU rendering modes for \Illustrator/.}
+\label{table:framebuffer-compare}
+
+\end{table*}
+
+\begin{table*}
+%\small
+\centering
+    \begin{tabular}{| E{1.4in} | L{2.3in} | L{2.6in} |} 
+\hline
+{\bf Capability} & {\bf CPU} & {\bf GPU} \\
+\hline \hline
+
+Rendering approach & Scan-line rasterization, professionally optimized & GPU ``stencil, then cover'' rendering via \NVpr/ \\
+\hline
+
+Rendering granularity & Cache of sub-image tiles for image reuse & Direct rendering to GPU framebuffer \\
+\hline
+
+Resolve to displayed color & Downsample of high resolution tile samples + apply color profile via CPU & Multisample downsample, then apply color profile via GLSL shader \\
+\hline
+
+Rendering implementation & C++ code directly manipulates pixels with CPU & CPU orchestrating OpenGL commands using GLSL shaders; pixel touching by GPU \\
+\hline
+
+Parallelism & Multi-core CPU rendering, divvying screen-space tiles among threads & GPU pipeline parallelism; NVIDIA dual-core OpenGL driver mode \\
+\hline
+
+Path control point transformation & CPU-based math & GPU-based vertex shading internal to \NVpr/ \\
+\hline
+
+Stroking & Conversion of stroked paths to fills & \NVpr/ stencils stroked paths directly---approximating cubic B\'{e}zier segments as a sequence of quadratic strokes \\
+\hline
+
+Antialiasing mechanism                  & Fractional coverage during scan-line rasterization & 8x multisampling \S\ref{sec:memory} \\
+\hline
+
+Blend modes & Optimized C++ with MMX and SSE intrinsics & Conventional GPU blending for {\em Normal} and {\em Screen}; \KHRbea/ for advanced PDF blend modes \S\ref{sec:blendmodes} \\
+\hline
+
+Non-isolated transparency group & Initialize (system memory) group framebuffer from lower layer contents; CPU render group with both non-isolated {\em and} isolated alpha; once group is rendered, composite from group framebuffer to lower layer after first subtracting out lower layer contents from group framebuffer & Allocate renderable GPU color texture(s) for layer {\em and} 1-component ``isolated alpha'' buffer cleared to zero; blit lower layer contents to new framebuffer object color contents; GPU render group with extra 1-component buffer accumulating isolated alpha; reverse subtract lower layer color from group color texture(s) based on isolated alpha; composite with blend mode color texture(s) for layer to lower layer framebuffer object \S\ref{sec:non-isolated-groups} \\
+\hline
+
+Isolated transparency group & Initialize group framebuffer (system memory) to clear; GPU render group with single alpha; once group is rendered, composite with blend mode from group framebuffer to lower layer & Allocate renderable GPU color texture(s) for layer; GPU render group; composite with blend mode color texture(s) for layer to lower layer framebuffer object \S\ref{sec:isolated-groups} \\
+\hline
+
+Knockout & Tagging pixels as done immediately once written in a knockout group & Reverse rendering of objects with the layer; unless combined with non-isolated group when depth buffering is used \S\ref{sec:knockout} \\
+\hline
+
+Path clipping & Concurrent scan-line rasterization of clip path & Stencil clip path with \NVpr/ into upper bits of the stencil buffer; then stencil draw path against stencil buffer upper bits \S\ref{sec:patterns} \\
+\hline
+
+Gradients & CPU shading code in C++ & GLSL fragment shaders with 1D texture for filtering and attribute generation by glPathTexGenNV \S\ref{sec:shading} \\
+\hline
+
+Gradient mesh implementation & CPU-based recursive mesh subdivision & Direct evaluation of 2D mesh vertex position \& color via GPU programmable tessellator, then hardware rasterization \S\ref{sec:gradient-meshes} \\
+\hline
+
+Implementation of Illustrator Effects (FX) & CPU-based effect plugin code processes layer image to make new image & Layer image must be read to CPU; CPU-based effect plugin code processes layer image to make new image; new image loaded as a texture and applied as image gradient \S\ref{sec:background} \\
+\hline
+
+    \end{tabular}
+
+\caption{Comparison of rendering approaches in CPU and GPU rendering modes for \Illustrator/.}
+\label{table:rendering-compare}
+
+\end{table*}
+
+Our contributions for GPU-acceleration are best understood in contrast
+with Illustrator's pre-existing CPU rendering approach.
+All but a cursory description of Illustrator's CPU rendering approach is beyond the scope of this paper.
+Illustrator's CPU rendering closely follows the PDF standard \cite{PDF-Spec}.
+AGM's CPU renderer
+relies on a robust, expertly-tuned, but reasonably conventional active edge list algorithm
+\cite{Foley:1990:CGP:83821}
+for rasterizing arbitrary paths including B\'{e}zier segments \cite{TurnerFreeType2}.
+Table \ref{table:framebuffer-compare} lists the differences between the CPU and GPU approaches in
+organizing the framebuffer storage for rendering.
+Table~\ref{table:rendering-compare} lists the ways rendering is different between the CPU and GPU approaches.
+
+\ifdefined\NOSHOW
+When the requirements for GPU-acceleration are met by the system, both CPU and GPU rendering are available.
+%Figure~\ref{fig:gpu-performance-preferences} shows the ``GPU Performance'' panel.
+The user can quickly toggle between the two rendering modes with a
+keyboard shortcut (Ctrl-E) or the {\em View$\rightarrow$GPU Preview}
+pulldown menu toggle option.  This ability to toggle the CPU versus GPU renderer
+makes it easily for users (and Quality Assurance engineers)
+to confirm they render essentially identical results---though not exactly pixel-for-pixel identical.
+The tab above each artwork window ``GPU Preview'' when its contents are GPU rendered as shown in Figure~\ref{fig:teaser}.
+\fi

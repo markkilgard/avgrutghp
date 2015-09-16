@@ -1,0 +1,66 @@
+% !TEX root = illustrator_submission.tex
+
+\section{Related Work}
+\label{sec:relatedwork}
+
+The PDF specification \cite{PDF-Spec} describes in detail the rendering model \Illustrator/ implements.
+Kilgard and Bolz \shortcite{KilgardBolz2012} provides a good review of GPU-acceleration approaches for path rendering
+and is the crucial underlying functionality upon which our work relies.  
+
+Our interest in rendering complex
+vector graphics scenes is similar to the random-access vector texture approach of
+\cite{Nehab:2008:RRG:1457515.1409088} and its refinement by \cite{Leben:Thesis:2010}.
+However \Illustrator/'s raison d'\^{e}tre is arbitrary editing of vector graphics scenes in a very general
+setting (permitting CMYK color spaces, blend modes, transparency groups, etc.) so the need to
+re-encode the scene's vector texture whenever the scene is manipulated is unappealing.
+
+Vector textures are also unappealing because we must support all of \Illustrator/'s rich feature set but
+a vector texture scheme 
+effectively centralizes support for the scene's entire rendering requirements.  This means
+the fragment shader used to decode the vector texture approach
+must be prepared to incorporate every possible vector graphics feature in the scene.
+The advantage of random-access decoding when rendering from a vector texture, while interesting, is not particularly relevant
+to \Illustrator/.
+
+Recent work by \cite{GanEtAl14} has significantly advanced the vector texture approach by using CUDA
+to implement massively-parallel vector graphics on the GPU
+rather than the conventional graphics pipeline.
+Section~\ref{sec:mpvg} compares their reported performance to ours so we defer more discussion until then.
+
+\subsection{Alternative Vector Graphics Editors}
+
+While there are many alternative path-based vector graphics editors, such as Inkscape \cite{kirsanov2009inkscape}
+and CorelDRAW \cite{CorelDRAWbook},
+no existing vector graphics editor significantly exploits graphics hardware
+acceleration to the best of our knowledge.
+
+While not a conventional path-based editor,
+the Mischief application \cite{MischiefWebPage} for scalable drawing, sketching, and painting is GPU-accelerated.
+Mischief takes an Adaptive Distance Field (ADF) approach
+\cite{Frisken:2006:DDF:1185657.1185675}.  ADFs represent shape implicitly
+rather than the explicit path-based approach used by \Illustrator/ and PDF
+to represent shape. A hybridization of Mischief's implicit approach and our explicit approach may be possible
+given the commonality of GPU-acceleration.
+
+\subsection{Smooth Shading} 
+
+The PDF standard provides several shading operators for continuous color. 
+Linear and radial gradients are very familiar to 2D digital artists and are a standard way for
+integrating continuous color into vector graphics content.  For example, the SVG standard \cite{SVG-Spec} supports
+both linear and radial gradients.  Our GPU-acceleration efforts accelerate both linear and radial
+gradients using straightforward cover shaders as described in \cite{KilgardBolz2012}.
+
+\Illustrator/'s {\em gradient mesh} tool provides a way to shade paths using
+a mesh of Coons patches to assign and edit continuous color within a path \cite{PDF-Spec,CoonsPaper}.
+Skilled artists use gradient meshes to create editable photorealistic resolution-independent artwork,
+often sampling colors for the mesh control points from photographs.
+%Researchers have explored techniques to assist in the generation of
+%gradient meshes \cite{Sun:2007:IVU:1276377.1276391,Lai:2009:ATG:1531326.1531391}.
+
+A different approach to
+assigning smooth color to vector graphics artwork called {\em diffusion curves} \cite{Orzan:2013:DCV:2483852.2483873,Sun:2012:DCT:2185520.2185570,Ilbery:2013:BDC:2508363.2508426} relies on
+partitioning 2D space with vector-based primitives and letting color naturally ``diffuse'' through the
+scene to a steady-state that respects the partitions.  The color diffusion process is computationally intensive and
+well-suited for the massively parallel nature of the GPU.  Our immediate interest is accelerating
+\Illustrator/'s existing gradient mesh functionality though we anticipate our transition to the GPU
+facilitates the adoption of more intuitive gradient methods otherwise too expensive for the CPU.

@@ -1,0 +1,142 @@
+% !TEX root = illustrator_submission.tex
+
+\section{Introduction}
+\label{sec:intro}
+
+%% The ``\copyrightspace'' command must be the first command after the 
+%% start of the first section of the body of your paper. It ensures the
+%% copyright space is left at the bottom of the first column on the first
+%% page of your paper.
+
+\copyrightspace
+
+Designers and artists worldwide rely on \AdobeIllustrator/
+to design and edit
+resolution-independent 2D artwork and typographic content.
+\Illustrator/ was Adobe's very first application when released over 27 years ago.
+
+Prior to our work, no version utilized graphics hardware to accelerate \Illustrator/'s rendering.
+All rendering was performed entirely by the CPU.
+This situation is in stark contrast to the now ubiquitous GPU-acceleration of 3D graphics rendering
+in Computer-Aided Design, Animation, and Modeling applications.  So while other graphical content creation applications
+readily benefit from the past 15 years of improvements in GPU functionality and performance, \Illustrator/
+could neither benefit from nor scale with the tremendous strides in GPU functionality and performance.
+Our work remedies this situation as Figure~\ref{fig:teaser} shows.
+
+The starting point for our work is OpenGL 4.4 \cite{GL44spec}
+and the GPU-accelerated ``stencil, then cover'' path rendering functionality described in \cite{KilgardBolz2012}.
+While the \NVpr/ OpenGL extension \cite{NVpr}
+provides very fast and resolution-independent rendering of first-class path objects just as we need, \Illustrator/'s
+rendering model requires much more than merely rendering paths.  
+We had to develop our own strategies to handle features of
+\Illustrator/ that, while dependent on path rendering, require considerably more sophisticated orchestration of the GPU.
+We focus on the GPU-based techniques we developed and productized to accomplish
+full GPU-acceleration of \Illustrator/.
+
+Adobe
+originally developed \Illustrator/ as a vector graphics editor for PostScript \cite{PLRM} which implements the
+imaging model described by \cite{Warnock:1982:DIG:800064.801297}.
+\Illustrator/ today depends on the Portable Document Format (PDF) standard for its underlying rendering capabilities
+as described by the ISO 32000 standard \cite{PDF-Spec}.  The evolution of PostScript to PDF introduced a number
+of sophisticated graphics capabilities for dealing with printer color spaces, compositing, and photorealistic artistic shading.
+These capabilities developed in parallel with but isolated from
+contemporaneous hardware-oriented improvements in interactive 3D graphics.
+PDF and \Illustrator/ incorporated features and solutions relevant to
+the print industry such as subtractive color spaces, typography, and
+rasterization of 2D spline-based content targeting print engines with
+extremely high pixel density.  However GPU hardware designers essentially
+ignored such concerns---instead focusing on interactive 3D graphics.
+
+For example, GPUs specialize at rendering RGB colors---typically with alpha, so RGBA---for
+display on emissive RGB monitors.  Indeed the framebuffer, texture, and memory subsystems of GPUs are 
+tailored specifically for handling 4-component RGBA colors.
+However \Illustrator/ users target printed color output and expect accurate color reproduction
+so the default document color mode in \Illustrator/ is CMYK, a color space intended for printed content.
+\Illustrator/ also does support RGB documents but CMYK matters more to professional users.
+
+Rather than just 4 color components as GPUs are designed to handle well,
+CMYK involves at least 5 components (the process ink colors {\em cyan}, {\em magenta},
+{\em yellow}, and {\em black} + alpha) and then additional {\em spot} colors assigned to specific custom inks.
+Simply converting CMYK colors to RGB and rendering in an RGB color space is not the same as rendering into
+a proper CMYK color space as Figure~\ref{fig:cmyk-vs-rgb-emulation} shows.
+Among the differences, CMYK is a subtractive color space while RGB is an additive color
+space so color arithmetic such as blending must account for this difference.
+When a GPU's data paths are so specialized for processing RGBA values with exactly
+4 components, handling 5 or more components in a manner consistent with PDF
+requirements and at reasonable efficiency requires novel treatment.
+
+\subsection{Motivation}
+
+Our work to GPU-accelerate \Illustrator/ has the obvious goal of improving
+the rendering speed and interactivity to improve user productivity.  \Illustrator/
+documents can become extremely complex and so poor rendering performance
+can frustrate a designer's creativity.
+
+We also considered display technology trends, particularly increasing screen resolutions and
+pixel densities.  So-called {\em 4K} resolutions such as Ultra HD at 3840x2160
+are particularly interesting to us.
+CPU performance scaling for rendering in \Illustrator/ has clearly not
+been adequate to keep up with the increasing number of pixels needing to be rendered.
+Recent 5K Ultra HD (5120x2880) displays make this more pressing.
+
+%%%We also observe how the proliferation of non-PC devices are creating a multitude of pixel resolutions
+%%%to which to deploy resolution-independent 2D content.
+
+While our focus has been fully accelerating {\em existing} features of the PDF rendering model, we
+anticipate our transition of \Illustrator/'s rendering to the GPU allows us to accelerate graphics
+operations, known as {\em effects} in \Illustrator/, that are handled ``above'' the PDF rendering model currently.
+Gaussian blurs and image warps are obvious examples of effects the GPU could significantly accelerate.
+\ifdefined\NOSHOW
+Prior to \Illustrator/'s GPU-acceleration, processing effects with the
+GPU was simply untenable because the inputs and outputs of effects reside in system
+memory where they are not efficiently accessible to the GPU.
+\fi
+
+% When all Illustrator rendering occurs on the GPU, effect acceleration becomes possible.
+
+\subsection{Contributions and Outline}
+\label{sec:contributions}
+
+Our key contributions are:
+\begin{itemize}
+
+\item Novel repurposing of the GPU's multiple RGBA render buffers for {\em NChannel} color space rendering of CMYK process colors and additional spot colors with full blending support.
+
+\item GPU algorithms to composite both isolated and non-isolated transparency groups properly.
+
+\item Tessellating gradient meshes to shade paths via GPU hardware tessellation.
+
+\item Harnessing ``stencil, then cover'' path rendering to support arbitrary path clipping, pattern shading, and knockout groups.
+
+\item Rendering complex vector scenes with the GPU many times faster than comparable multi-core CPU rendering.
+
+\end{itemize}
+These contributions are broadly applicable beyond \Illustrator/ and benefit
+any GPU-accelerated software system that
+utilizes PDF, SVG, or similar printing, web, or vector graphics standards.
+We anticipate web browsers, other 2D digital content creation applications,
+document previewers, and even printers will use our contributions
+to accelerate existing standards for resolution-independent 2D vector graphics.
+
+Furthermore we expect GPU-acceleration of \Illustrator/ to motivate graphics hardware architects
+to focus on specific optimizations for this important rendering model.  Likewise research in GPU-based  techniques for vector
+graphics becomes substantially easier to productize.
+
+Section~\ref{sec:relatedwork} outlines relevant prior work.  Section~\ref{sec:background} provides useful background for \Illustrator/'s
+software architecture relevant to rendering. 
+Section~\ref{sec:blendmodes} discusses GPU support for blend modes, a prerequisite for our contributions.
+Sections~\ref{sec:cmyk} to \ref{sec:shading} describe the primary techniques we developed
+to GPU-accelerate Illustrator fully.  Section~\ref{sec:comparison} compares and contrasts our GPU-acceleration to Illustrator's existing CPU renderer.   Section~\ref{sec:performance} presents our performance improvements.  Section~\ref{sec:conclusion} concludes
+with a call for standardization and discussion of future plans.
+
+\subsection{Status}
+
+The June 2014 release of \AdobeIllustratorCC/ first incorporated our
+GPU-acceleration efforts.  Adobe reports over 3.4 million Creative
+Cloud subscribers as of December 2014.  A substantial fraction of
+these subscribers use \Illustrator/.
+The complete
+contributions we discuss are refinements beyond the initial release.
+In particular, the 2015 version introduces CMYK
+(Section~\ref{sec:cmyk}) and tessellation-based gradient meshes (Section
+\ref{sec:gradient-meshes}).

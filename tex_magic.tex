@@ -1,0 +1,93 @@
+
+%% The 'helvet' and 'times' packages define the typefaces used for
+%% serif and sans serif type in this document. Computer Modern Roman 
+%% is used for mathematics typesetting. The scale factor is set to .92
+%% to bring the sans-serif type in line with the serif type.
+
+%\usepackage[scaled=.92]{helvet}
+\usepackage{times}
+\usepackage{url}
+
+%% The 'graphicx' package allows for the inclusion of EPS figures.
+
+\usepackage{graphicx}
+%\usepackage{parskip}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{multirow}
+%\usepackage{epstopdf}
+\usepackage{listings}
+%\usepackage{color}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage[super]{nth}  % http://www.ctan.org/pkg/nth
+
+%\usepackage[all=normal,floats,leading,paragraphs,charwidths,tracking,wordspacing,lists=tight]{savetrees}
+%\usepackage[all=normal,bibliography]{savetrees}
+
+%\usepackage{natbib}
+%\usepackage{enumitem}
+%%\setlist{nolistsep}
+%%\setlist{notopsep}
+%%\setlist{noitemsep}
+%\usepackage{paralist}
+
+\usepackage{marvosym}
+
+\usepackage{etoolbox}
+\usepackage{authblk}
+
+\pagenumbering{arabic}
+
+
+
+\definecolor{DarkGreen}{RGB}{0,100,0}
+\newcommand{\comment}[1]{}
+
+% lstlisting settings
+% syntax coloring
+\lstset{
+language=C,
+showspaces=false,
+showstringspaces=false,
+basicstyle=\ttfamily \small,
+commentstyle=\color{DarkGreen} \em,
+keywordstyle=\color{blue},
+morekeywords={float2,float3,float4,tex1D,CENTROID,TEXCOORD0,COLOR,TEXUNIT0,
+discard,sampler1D,uniform,out,length,ubyte,MOVE_TO,LINE_TO,CLOSE_PATH,
+uint,SYSTEM_FONT_NAME,STANDARD_FONT_NAME,PathGlyphRange,PATH_JOIN_STYLE,MITER_TRUNCATE,PATH_STROKE_WIDTH,
+PathCommands,PathParameteri,PathParameterf,GenPaths,USE_MISSING_GLYPH,SHORT,bitfield,
+PathString,BOLD_BIT,sizei,MatrixLoadIdentity,MatrixOrtho,PROJECTION,MODELVIEW,
+PathDashArray,Color3f,CoverStrokePath,CONVEX_HULL,COUNT_UP,StencilStrokePath,
+STENCIL_TEST,ROUND,PATH_JOIN_STYLE,PATH_STROKE_WIDTH,PathParameteri,PathParameterf,
+Enable,StencilFunc,StencilOp,KEEP,ZERO,NOTEQUAL,CoverFillPath,StencilFillPath,
+strlen,PATH_FORMAT_SVG,NULL,FLOAT,PATH_MITER_LIMIT}
+}
+
+% hyperref features
+\hypersetup{
+colorlinks=true,
+pdfstartview=FitV,
+linkcolor=blue,
+citecolor=blue,
+urlcolor=blue,
+}
+
+
+
+%% use this for zero \parindent and non-zero \parskip, intelligently.
+
+%\usepackage{parskip}
+
+%% Optional: the 'caption' package provides a nicer-looking replacement
+%% for the standard caption environment. With 'labelfont=bf,'textfont=it',
+%% caption labels are bold and caption text is italic.
+
+\usepackage[labelfont=bf,textfont=it]{caption}
+
+\makeatletter
+\g@addto@macro\@verbatim\small
+\makeatother
+
+\pdfcompresslevel0
+
+\newcommand{\asp}{\hspace*{12mm}}

@@ -1,0 +1,144 @@
+% !TEX root = illustrator_final.tex
+
+% Accelerating Vector Graphics Rendering using the Graphics Hardware Pipeline
+
+%\documentclass[review]{acmsiggraph}            % review
+%\documentclass[annual]{acmsiggraph}          % preprint
+%\documentclass[reprint,pretty]{acmsiggraph}          % preprint
+
+\input{tex_magic}
+\usepackage{authblk}
+\usepackage{subfigure}
+%\usepackage{units}
+%\usepackage{ucs}
+\usepackage{nicefrac}
+%\usepackage[utf8x]{inputenc}
+%\usepackage{texcomp}
+\usepackage{array}
+% column types with raggedright behavior
+% https://tex.stackexchange.com/questions/12703/how-to-create-fixed-width-table-columns-with-text-raggedright-centered-raggedlef
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}p{#1}}
+\newcolumntype{E}[1]{>{\em \raggedright\let\newline\\\arraybackslash\hspace{0pt}}p{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}p{#1}}
+
+\usepackage[super]{nth}  % http://www.ctan.org/pkg/nth
+
+\TOGonlineid{45678}
+\TOGvolume{34}
+\TOGnumber{4}
+\TOGarticleDOI{1111111.2222222}
+%\TOGprojectURL{}
+%\TOGvideoURL{}
+%\TOGdataURL{}
+%\TOGcodeURL{}
+\TOGonlineid{0394}
+
+\reprintyear{2015}
+\reprintlocation{Los Angeles}
+\reprintdates{August, 9--13}
+
+%\reprintyear{2015}
+%\reprintlocation{Los Angeles}
+%\reprintdates{August 9--13}
+%\reprintlogo{SA2012_white}
+%\reprintlogobefore{\hspace*{-.3in}}
+
+\title{Accelerating Vector Graphics Rendering using the Graphics Hardware Pipeline}
+
+\makeatletter
+% put the affiliation footnotes on one line
+% https://tex.stackexchange.com/questions/30394/authblk-affiliations-on-same-line
+\renewcommand\AB@affilsepx{ \hspace{1in} \protect\Affilfont}
+\makeatother
+
+\author[1]{Vineet Batra}
+\author[2]{Mark J. Kilgard}
+\author[1]{Harish Kumar}
+\author[2]{Tristan Lorach}
+\affil[1]{Adobe Systems}
+\affil[2]{NVIDIA}
+%\renewcommand\Authands{ and }
+
+%%% The ``pdfauthor'' command accepts the authors of the work,
+%%% comma-delimited, and adds this information to the PDF metadata.
+
+\pdfauthor{Vineet Batra, Tristan Lorach, Mark J. Kilgard}
+
+%%% Keywords that describe your work. The ``\keywordlist'' command will print
+%%% them out.
+
+\keywords{Illustrator, path rendering, vector graphics, OpenGL}
+
+%\linenumbers %MJK temporary for line numbers in every version
+
+\def\NVpr/{{\tt NV\_path\_\-rendering}}
+\def\NVprs/{{\tt NV\_path\_\-rendering}'s}
+\def\NVbea/{{\tt NV\_blend\_equation\_\-advanced}}
+\def\KHRbea/{{\tt KHR\_blend\_\-equation\_\-advanced}}
+\def\NVbb/{{\tt NV\_blend\_barrier}}
+\def\NVfms/{{\tt NV\_framebuffer\_mixed\_samples }}
+\def\ARBtms/{{\tt ARB\_texture\_multisample}}
+\def\AdobeIllustrator/{Adobe Illustrator}
+\def\AdobeGraphicsModel/{Adobe Graphics Model}
+\def\AdobeColorEngine/{Adobe Color Engine}
+\def\AGM/{AGM}
+\def\CoolType/{CoolType}
+\def\Illustrator/{Illustrator}
+\def\Illustrators/{Illustrator's}
+\def\AnIllustrator/{An Illustrator}
+\def\IllustratorCC/{Illustrator CC}
+\def\AdobeIllustratorCC/{Adobe Illustrator CC}
+
+\newcommand{\urlwofont}[1]
+{
+\urlstyle{same}\url{#1}
+}
+
+\begin{document}
+
+\teaser{
+  %\includegraphics[width=\textwidth]{images/ai_teaser.png}
+  %\includegraphics[height=1.5in]{images/ai_teaser_Draft7.png}
+  \includegraphics[width=\textwidth]{images/ai_teaser_Draft6.png}
+  %\includegraphics[width=5in]{images/ai_teaser_Draft5.png}
+  \caption{\label{fig:teaser} Five complex RGB and CMYK documents GPU-rendered by \IllustratorCC/; all rendered with ``GPU Preview'' enabled.}
+}
+
+\maketitle
+
+\input{abstract}
+
+\begin{CRcatlist}
+  \CRcat{I.3.4}{Computer Graphics}{Graphics Utilities}{Graphics Editors};
+  %\CRcat{I.3.4}{Computer Graphics}{Graphics Utilities}{Picture Description languages};
+\end{CRcatlist}
+
+\keywordlist
+
+\input{intro}
+
+\input{relatedwork}
+
+\input{background}
+
+\input{blendmodes}
+
+\input{cmyk}
+
+\input{transparency}
+
+\input{shading}
+
+\input{comparison}
+
+\input{performance}
+
+\input{conclusion}
+
+\pdfbookmark[1]{References}{bkmk:references}
+\bibliographystyle{acmsiggraph}
+%\nocite{*}  % include references not cited in the paper
+\bibliography{path_rendering}
+
+\end{document}

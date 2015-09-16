@@ -1,0 +1,87 @@
+% !TEX root = illustrator_submission.tex
+
+\section{Conclusions}
+\label{sec:conclusion}
+
+We have succeeded in GPU-accelerating \Illustrator/ despite
+decades of being unadvantaged by graphics hardware.  Our
+benchmarking shows significant speed-ups, particularly at 4K resolution.
+Our contributions introduce novel techniques for supporting CMYK color
+space rendering on existing GPUs, proper transparency group support
+including non-isolated groups and knock-out, and mapping PDF's gradient
+mesh shading to GPU tessellation.
+
+\subsection{Broader Hardware Support}
+\label{sec:standardization}
+
+OpenGL 4.4 is the multi-vendor standard baseline for our GPU-acceleration
+effort but \Illustrator/ also requires the \NVpr/ and \KHRbea/
+extensions.  As a practical matter, today just NVIDIA GPUs (Fermi
+generation \cite{Fermi} and beyond) on Windows support the prerequisite
+OpenGL functionality.  \Illustrator/ supports a wide range
+of system configurations so we
+naturally want these GPU-acceleration benefits supported more broadly.
+We are exploring ways to support a broader range of GPUs.
+Standardization of \NVpr/ would make this much easier.
+
+\ifdefined\NOSHOW
+We happily note all the blend mode functionality we need
+is now standardized as \KHRbea/ \cite{KHRbeaSpec} though other shader-based
+alternatives (see Section \ref{sec:blendalternatives}) to implement blend modes are worth investigating.
+\fi
+
+\subsection{Future Work}
+\label{sec:futurework}
+
+Much of the user interface of \Illustrator/ today assumes
+re-rendering the scene is slow and expensive.  For example, the
+user interface encourages users to {\em isolate} a portion of the
+scene to avoid rendering the complete scene.  Similarly editing
+often happens by dragging overlaid ``blue lines'' rather than a more
+{\em what-you-see-is-what-you-get} interaction model.  We hope the
+GPU-acceleration we have introduced into \Illustrator/ will facilitate
+more powerful, intuitive, and fluid user interfaces for vector graphics
+editing.
+
+We note a number of inspired research efforts relevant to vector
+graphics editing that are either conceived with GPU-acceleration
+in mind---such as diffusion curves \cite{Andronikos2013}---or
+introduce vector graphics complexity that overwhelms conventional
+CPU-based vector graphics rendering---such as digital micrography
+\cite{Maharik:2011:DM:2010324.1964995}.  We hope by bringing
+\Illustrator/ to the GPU, these techniques will become tractable to
+support within \Illustrator/ and thereby be adopted by digital artists.
+
+Our framebuffer memory usage is substantial.  We want to incorporate
+NVIDIA's \NVfms/ OpenGL
+extension \cite{FramebufferMixedSamples}
+that allows an OpenGL framebuffer object to have fewer color
+samples than stencil samples (and no depth samples) to reduce memory usage without reducing
+the rasterization quality of path rendering.  
+
+We believe graphics hardware architects can improve the support for
+print-oriented features---in particular the CMYK color space.  Doing so
+would greatly reduce the memory bandwidth, memory footprint, and greatly
+simplify the complex orchestration of multiple RGBA color buffers required
+to accomplish CMYK rendering.
+
+\ifreviewelse
+{}
+{
+\section*{Acknowledgments}
+
+We thank:
+David Aronson,
+Rui Bastros,
+Jeff Bolz,
+Rajesh Budhiraja,
+Nathan Carr,
+Qingqing Deng,
+Vineet Punjabi,
+E Ramalingam,
+Anubhav Rohatgi,
+Lekhraj Sharma,
+Gopinath Srinivasan,
+Tarun Beri,
+and our anonymous reviewers.
+}

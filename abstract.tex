@@ -1,0 +1,23 @@
+% !TEX root = illustrator_submission.tex
+
+\begin{abstract}
+
+%Designers and artists worldwide rely on \AdobeIllustrator/ to edit vector graphics content.
+We describe our successful initiative to accelerate
+Adobe
+\Illustrator/ with the graphics hardware pipeline of modern GPUs.
+Relying on  OpenGL 4.4 plus recent OpenGL extensions for
+advanced blend modes and first-class GPU-accelerated path rendering, we
+accelerate the \AdobeGraphicsModel/ (\AGM/) layer responsible for rendering
+sophisticated \Illustrator/ scenes.  \Illustrator/ documents render in
+either an RGB or CMYK color mode.  While GPUs are designed and optimized
+for RGB rendering, we orchestrate OpenGL rendering of vector content
+in the proper CMYK color space and accommodate the 5+ color components
+required.  We support both non-isolated and isolated transparency groups, knockout,
+patterns, and arbitrary path clipping.  We harness GPU
+tessellation to shade paths smoothly with gradient meshes.  We do all this
+and render complex \Illustrator/ scenes 2 to 6x faster than CPU rendering
+at Full HD resolutions; and 5 to 16x faster at Ultra HD resolutions.
+
+\end{abstract}
+
