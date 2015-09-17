@@ -1,5 +1,5 @@
-gpupathrender
-=============
+avgrutghp
+=========
 
 LaTeX source for "Accelerating Vector Graphics Rendering using the
 Graphics Hardware Pipeline" SIGGRAPH 2015 paper
